@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>Waktu Solat OBS · Masjid Kampung Sungai Lang Baru</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://apiwaktusolatsgr03.vercel.app">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --green-900:#03251b;
+    --green-800:#042f24;
+    --green-700:#0a4233;
+    --gold:#d4af37;
+    --gold-bright:#f4cf5a;
+    --gold-soft:#e9c96a;
+    --ink:#f4ecd8;
+    --ink-muted:#9fb1a4;
+    --display:"Cormorant Garamond", Georgia, serif;
+    --serif:"Fraunces", Georgia, serif;
+    --body:"Plus Jakarta Sans", system-ui, sans-serif;
+    --arabic:"Amiri", serif;
+    --ease:cubic-bezier(0.16,1,0.3,1);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  html,body{
+    width:1920px; height:1080px; overflow:hidden;
+    /* Untuk overlay ATAS kamera nanti: tukar baris bawah ini ke `background:transparent;` */
+    background:var(--green-800);
+  }
+
+  .stage{
+    position:relative;
+    width:1920px; height:1080px;
+    background:
+      radial-gradient(circle at 50% -5%, var(--green-700) 0%, var(--green-800) 45%, var(--green-900) 100%);
+    color:var(--ink);
+    font-family:var(--body);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:56px 90px 48px;
+    overflow:hidden;
+  }
+
+  /* Corak geometri Islam — tekstur halus */
+  .stage::before{
+    content:'';
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='1' opacity='0.10'%3E%3Crect x='34' y='34' width='52' height='52'/%3E%3Crect x='34' y='34' width='52' height='52' transform='rotate(45 60 60)'/%3E%3Ccircle cx='60' cy='60' r='4'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:120px 120px;
+  }
+  /* Vignette lembut untuk fokuskan tengah */
+  .stage::after{
+    content:'';
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,.45) 100%);
+  }
+
+  .stage > *{ position:relative; z-index:1; }
+
+  /* ─── HEADER ─── */
+  .hd{ text-align:center; }
+  .hd-logo{
+    width:96px; height:96px; border-radius:50%;
+    object-fit:contain; padding:8px;
+    border:1px solid rgba(212,175,55,.5);
+    background:rgba(0,0,0,.3);
+    margin-bottom:14px;
+  }
+  .hd-name{
+    font-family:var(--display);
+    font-weight:600; font-size:2.9rem; line-height:1.05;
+    letter-spacing:.02em; color:#fff;
+  }
+  .hd-zone{
+    font-family:var(--serif); font-style:italic;
+    font-size:1.25rem; letter-spacing:.06em;
+    color:var(--gold-soft); margin-top:6px;
+  }
+
+  /* ─── DATE STRIP ─── */
+  .datestrip{
+    margin-top:22px;
+    display:inline-flex; align-items:center; gap:22px;
+    padding:12px 34px; border-radius:100px;
+    background:rgba(0,0,0,.3);
+    border:1px solid rgba(212,175,55,.28);
+    font-family:var(--serif);
+    font-size:1.5rem; letter-spacing:.02em;
+  }
+  .datestrip .sep{ color:var(--gold); opacity:.7; }
+  .datestrip .hij{ color:var(--gold-soft); }
+
+  /* ─── HERO ─── */
+  .hero{
+    flex:1;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    width:100%;
+  }
+  .hero-label{
+    font-family:var(--serif); font-style:italic;
+    font-size:1.7rem; letter-spacing:.34em; text-transform:uppercase;
+    color:var(--gold-soft); margin-bottom:6px;
+  }
+  .hero-name{
+    font-family:var(--display); font-weight:600;
+    font-size:8.5rem; line-height:.98; letter-spacing:.01em;
+    color:#fff; text-shadow:0 4px 60px rgba(212,175,55,.28);
+  }
+  .hero-time{
+    font-family:var(--serif); font-weight:300;
+    font-size:2.6rem; letter-spacing:.14em;
+    color:var(--gold-bright); margin-top:6px;
+    font-feature-settings:'tnum' on,'lnum' on;
+  }
+
+  /* ─── COUNTDOWN 3 BULATAN ─── */
+  .circles{
+    display:flex; gap:64px; margin-top:40px;
+  }
+  .circle{ text-align:center; }
+  .circle-disc{
+    position:relative; width:210px; height:210px; margin:0 auto 14px;
+    border-radius:50%;
+    box-shadow:0 0 40px rgba(212,175,55,.16);
+  }
+  .ring{ width:100%; height:100%; display:block; transform:rotate(-90deg); overflow:visible; }
+  .ring-bg{ fill:rgba(0,0,0,.5); stroke:rgba(212,175,55,.18); stroke-width:3.5; }
+  .ring-fill{
+    fill:none; stroke:var(--gold); stroke-width:3.5; stroke-linecap:round;
+    stroke-dasharray:100; stroke-dashoffset:100;
+    transition:stroke-dashoffset .95s linear;
+    filter:drop-shadow(0 0 6px rgba(212,175,55,.55));
+  }
+  .ring-fill.no-transition{ transition:none; }
+  .circle-num{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-weight:600; font-size:5.4rem;
+    color:#fff; font-feature-settings:'tnum' on,'lnum' on;
+  }
+  .circle-label{
+    font-family:var(--body); font-weight:700;
+    font-size:1rem; letter-spacing:.32em; text-transform:uppercase;
+    color:var(--gold-soft);
+  }
+
+  .hero-sub{
+    margin-top:34px; text-align:center;
+    font-family:var(--serif); font-style:italic;
+    font-size:1.35rem; color:var(--gold-soft); letter-spacing:.05em;
+  }
+  .hero-sub b{ color:#fff; font-style:normal; font-weight:600; letter-spacing:.06em; }
+
+  /* ─── WAKTU STRIP (8 waktu) ─── */
+  .strip{
+    width:100%;
+    display:grid; grid-template-columns:repeat(8,1fr); gap:16px;
+  }
+  .cell{
+    text-align:center; padding:18px 8px 16px;
+    background:rgba(0,0,0,.28);
+    border:1px solid rgba(212,175,55,.16);
+    border-radius:16px;
+    transition:.5s var(--ease);
+  }
+  .cell .cn{
+    font-family:var(--body); font-weight:700;
+    font-size:.98rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold-soft); margin-bottom:8px;
+  }
+  .cell .ct{
+    font-family:var(--display); font-weight:600; font-size:2.4rem;
+    color:var(--ink); font-feature-settings:'tnum' on,'lnum' on; line-height:1;
+  }
+  .cell.now{
+    background:rgba(212,175,55,.16);
+    border-color:var(--gold);
+    box-shadow:0 0 0 1px rgba(212,175,55,.35), inset 0 0 30px rgba(212,175,55,.08);
+  }
+  .cell.now .cn{ color:var(--gold-bright); }
+  .cell.now .ct{ color:var(--gold-bright); }
+
+  .err{
+    font-family:var(--serif); font-style:italic;
+    font-size:1.4rem; color:var(--ink-muted);
+  }
+
+  @media(prefers-reduced-motion:reduce){ .ring-fill{ transition:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <header class="hd">
+    <img class="hd-logo" src="https://arleta.site/interactivelink/1610/logomkslbil.png" alt="Logo MKSLB"
+         onerror="this.style.display='none'">
+    <div class="hd-name">Masjid Kampung Sungai Lang Baru</div>
+    <div class="hd-zone">Zon SGR03 · Kuala Langat, Selangor</div>
+  </header>
+
+  <div class="datestrip">
+    <span id="dt">—</span>
+    <span class="sep">|</span>
+    <span class="hij" id="dt-hij">—</span>
+  </div>
+
+  <main class="hero">
+    <div class="hero-label">Waktu Solat Seterusnya</div>
+    <div class="hero-name" id="nx-name">Memuatkan</div>
+    <div class="hero-time" id="nx-time">—</div>
+
+    <div class="circles" aria-hidden="true">
+      <div class="circle">
+        <div class="circle-disc">
+          <svg class="ring" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="46"></circle><circle class="ring-fill" id="r-h" cx="50" cy="50" r="46" pathLength="100"></circle></svg>
+          <div class="circle-num" id="c-h">00</div>
+        </div>
+        <div class="circle-label">Jam</div>
+      </div>
+      <div class="circle">
+        <div class="circle-disc">
+          <svg class="ring" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="46"></circle><circle class="ring-fill" id="r-m" cx="50" cy="50" r="46" pathLength="100"></circle></svg>
+          <div class="circle-num" id="c-m">00</div>
+        </div>
+        <div class="circle-label">Minit</div>
+      </div>
+      <div class="circle">
+        <div class="circle-disc">
+          <svg class="ring" viewBox="0 0 100 100"><circle class="ring-bg" cx="50" cy="50" r="46"></circle><circle class="ring-fill" id="r-s" cx="50" cy="50" r="46" pathLength="100"></circle></svg>
+          <div class="circle-num" id="c-s">00</div>
+        </div>
+        <div class="circle-label">Saat</div>
+      </div>
+    </div>
+
+    <div class="hero-sub" id="sub">Sehingga waktu seterusnya di <b>SGR03 · Kuala Langat</b></div>
+  </main>
+
+  <section class="strip" id="strip">
+    <!-- diisi oleh JS -->
+  </section>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ─── CONFIG ───
+  const BASE  = 'https://apiwaktusolatsgr03.vercel.app/api/waktu-solat';
+  const OPTS  = 'adjust=jugra';   // pelarasan Bukit Jugra untuk kariah Kuala Langat
+  const NAMES = ['Imsak','Subuh','Syuruk','Dhuha','Zohor','Asar','Maghrib','Isyak'];
+  const KEYS  = ['imsak','subuh','syuruk','dhuha','zohor','asar','maghrib','isyak'];
+  const HMAP  = {Muh:'Muharram',Saf:'Safar',Raw:'Rabiulawal',Rak:'Rabiulakhir',
+    Jaw:'Jamadilawal',Jak:'Jamadilakhir',Rej:'Rejab',Syb:'Syaaban',
+    Ram:'Ramadan',Syw:'Syawal',Zkh:'Zulkaedah',Zhj:'Zulhijjah'};
+  const MS_M  = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+  const MS_D  = ['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'];
+  const $ = (id) => document.getElementById(id);
+
+  // ─── STATE ───
+  let times = [];          // 8 objek Date hari ini
+  let todayHijri = '';     // "15-Zhj-1447"
+  let tomorrow = null;     // {times:{...}} esok (dimuat bila perlu)
+  let timer = null;
+  let windowSecs = 1;
+  let last = { s:-1, m:-1, h:-1 };
+  let loadedDate = '';     // tarikh (KL) data semasa dimuatkan
+
+  boot();
+
+  async function boot(){
+    await loadToday();
+    // Segar semula tengah malam / berkala supaya data sentiasa betul
+    setInterval(guardDate, 60000);
+  }
+
+  function klDateStr(offset=0){
+    const d = new Date(); d.setDate(d.getDate()+offset);
+    return d.toLocaleDateString('en-CA', {timeZone:'Asia/Kuala_Lumpur'});
+  }
+
+  // Tukar "HH:MM" -> Date hari (offset) tempatan
+  function mk(hhmm, offset=0){
+    const [h,m] = hhmm.split(':').map(Number);
+    const d = new Date(); d.setDate(d.getDate()+offset);
+    d.setHours(h,m,0,0); return d;
+  }
+
+  async function loadToday(){
+    try{
+      const r = await fetch(`${BASE}?today&${OPTS}`);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      const data = await r.json();
+      const t = data.times;
+      times = KEYS.map(k => mk(t[k]));
+      todayHijri = t.hijri;
+      tomorrow = null;
+      loadedDate = klDateStr();
+      renderStatic();
+      startLoop();
+    }catch(e){
+      $('nx-name').textContent = 'Tiada Sambungan';
+      $('nx-time').textContent = '—';
+      $('sub').innerHTML = 'Cuba semula sebentar lagi…';
+      console.error(e);
+      setTimeout(loadToday, 15000); // cuba semula
+    }
+  }
+
+  // Muat data esok sekali (untuk Hijri selepas Maghrib + countdown Imsak esok)
+  async function loadTomorrow(){
+    if(tomorrow) return tomorrow;
+    try{
+      const r = await fetch(`${BASE}?date=${klDateStr(1)}&${OPTS}`);
+      if(r.ok) tomorrow = await r.json();
+    }catch(e){ /* diam — guna anggaran */ }
+    return tomorrow;
+  }
+
+  function guardDate(){
+    if(klDateStr() !== loadedDate) loadToday(); // dah masuk hari baru
+  }
+
+  // ─── HIJRI ───
+  function fmtHijri(s){
+    try{
+      const [d,abbr,y] = s.split('-');
+      return `${parseInt(d)} ${HMAP[abbr]||abbr} ${y}H`;
+    }catch(e){ return '—'; }
+  }
+
+  function renderStatic(){
+    const now = new Date();
+    $('dt').textContent = `${MS_D[now.getDay()]}, ${now.getDate()} ${MS_M[now.getMonth()]} ${now.getFullYear()}`;
+    renderStrip();
+    renderHijri();
+  }
+
+  async function renderHijri(){
+    let hs = todayHijri;
+    // Hari Islam bermula waktu Maghrib -> selepas Maghrib guna Hijri esok
+    if(times.length === 8 && new Date() >= times[6]){
+      const tm = await loadTomorrow();
+      if(tm && tm.times && tm.times.hijri) hs = tm.times.hijri;
+    }
+    $('dt-hij').textContent = fmtHijri(hs);
+  }
+
+  function renderStrip(){
+    const now = new Date();
+    const nextIdx = times.findIndex(t => t > now);
+    $('strip').innerHTML = times.map((t,i) => `
+      <div class="cell ${i===nextIdx?'now':''}">
+        <div class="cn">${NAMES[i]}</div>
+        <div class="ct">${fmtHM(t)}</div>
+      </div>`).join('');
+  }
+
+  // ─── LOOP UTAMA ───
+  function startLoop(){
+    if(timer) clearInterval(timer);
+    let first = true;
+    const tick = async () => {
+      const now = new Date();
+      let idx = times.findIndex(t => t > now);
+
+      let target, label, esok = false;
+      if(idx !== -1){
+        target = times[idx];
+        label  = NAMES[idx];
+        const prev = (idx===0) ? new Date(target.getTime()-12*3600*1000) : times[idx-1];
+        windowSecs = Math.max(1,(target-prev)/1000);
+      } else {
+        // Semua waktu hari ini berlalu -> countdown ke Imsak esok
+        const tm = await loadTomorrow();
+        if(tm && tm.times){
+          target = mk(tm.times.imsak, 1);
+          label  = 'Imsak';
+          esok   = true;
+          windowSecs = Math.max(1,(target - times[7])/1000);
+        } else {
+          $('nx-name').textContent='Imsak Esok'; $('nx-time').textContent='—';
+          setCircles(0,0,0); setRings(0,0,0,true); return;
+        }
+      }
+
+      const diff = Math.floor((target - now)/1000);
+      if(diff <= 0){ // waktu masuk -> segar semula
+        clearInterval(timer); timer=null;
+        renderStatic(); startLoop(); return;
+      }
+
+      $('nx-name').textContent = label + (esok ? ' (Esok)' : '');
+      $('nx-time').textContent = fmtHM12(target);
+      $('sub').innerHTML = esok
+        ? 'Menanti <b>Imsak esok</b> di SGR03 · Kuala Langat'
+        : 'Sehingga waktu seterusnya di <b>SGR03 · Kuala Langat</b>';
+
+      const h = Math.floor(diff/3600), m = Math.floor((diff%3600)/60), s = diff%60;
+      setCircles(h,m,s);
+      setRings(h,m,s,first);
+
+      // Kemas kini penonjolan strip & Hijri (selepas Maghrib)
+      renderStrip();
+      if(first || s===0) renderHijri();
+      first = false;
+    };
+    tick();
+    timer = setInterval(tick, 1000);
+  }
+
+  // ─── PAPARAN ───
+  function setCircles(h,m,s){
+    $('c-h').textContent = String(h).padStart(2,'0');
+    $('c-m').textContent = String(m).padStart(2,'0');
+    $('c-s').textContent = String(s).padStart(2,'0');
+  }
+
+  function setRings(h,m,s,snap){
+    const sP = (s/60)*100;
+    const mP = ((m*60+s)/3600)*100;
+    const totalRem = h*3600+m*60+s;
+    const hP = Math.min(100,(totalRem/windowSecs)*100);
+    const sWrap = !snap && sP > last.s + 1;
+    const mWrap = !snap && mP > last.m + 1;
+    ring('r-s', sP, snap||sWrap);
+    ring('r-m', mP, snap||mWrap);
+    ring('r-h', hP, snap);
+    last = { s:sP, m:mP, h:hP };
+  }
+
+  function ring(id, percent, snap){
+    const el = $(id); if(!el) return;
+    const off = 100 - Math.max(0, Math.min(100, percent));
+    if(snap){
+      el.classList.add('no-transition');
+      el.style.strokeDashoffset = off;
+      void el.getBoundingClientRect();
+      el.classList.remove('no-transition');
+    } else {
+      el.style.strokeDashoffset = off;
+    }
+  }
+
+  function fmtHM(d){
+    return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+  function fmtHM12(d){
+    let h=d.getHours(); const m=String(d.getMinutes()).padStart(2,'0');
+    const ap = h>=12?'PM':'AM'; h = h%12||12;
+    return `${String(h).padStart(2,'0')} : ${m} ${ap}`;
+  }
+})();
+</script>
+</body>
+</html>
